@@ -51,22 +51,26 @@ class TCPServer {
 
     public static void main(String argv[]) throws Exception 
     { 
-      String clientSentence; 
-
+      String clientSentence;
       ServerSocket welcomeSocket = new ServerSocket(10001); 
-  
-      while(true) { 
-  
-           Socket connectionSocket = welcomeSocket.accept(); 
+      welcomeSocket.setReuseAddress(true);
+      while(true) {
+           Socket connectionSocket = welcomeSocket.accept();
+           
            BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())); 
-	   DataOutputStream  outToClient = new DataOutputStream(connectionSocket.getOutputStream()); 
+	   DataOutputStream  outToClient = new DataOutputStream(connectionSocket.getOutputStream());
            clientSentence = inFromClient.readLine(); 
            
            if(clientSentence != null && clientSentence.length() > 0){
                 String TipoHash = ValidaMensagens(clientSentence);
-                String hash = HashString(TipoHash, clientSentence, true);
-                outToClient.writeBytes(hash + "\n"); 
+                if(TipoHash.length() > 0){
+                    String hash = HashString(TipoHash, clientSentence, true);
+                    outToClient.writeBytes(hash + "\n"); 
+                    outToClient.flush();
+                }
            }
+           
+           inFromClient.ready();
         } 
     }
 } 
