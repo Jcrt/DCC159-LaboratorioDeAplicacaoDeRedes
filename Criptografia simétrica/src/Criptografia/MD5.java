@@ -3,7 +3,7 @@ package Criptografia;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
  
-public class Criptografia {
+public class MD5 {
  
     private static MessageDigest md = null;
  

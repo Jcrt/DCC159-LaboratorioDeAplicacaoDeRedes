@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.java.j2seproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/j2se-project/3">
-            <name>MD5_e_SHA1</name>
+            <name>AES_e_3DES</name>
             <source-roots>
                 <root id="src.dir"/>
             </source-roots>

@@ -1,7 +1,9 @@
 package Classes;
 
+import Criptografia.AES;
 import Criptografia.MD5;
 import Criptografia.SHA1;
+import Criptografia.TripleDES;
 import java.io.*; 
 import java.net.*; 
 import java.security.NoSuchAlgorithmException;
@@ -51,26 +53,40 @@ class TCPServer {
 
     public static void main(String argv[]) throws Exception 
     { 
+      String key = "Bar12345Bar12345";
+      String initVector = "RandomInitVector";   
+        
       String clientSentence;
-      ServerSocket welcomeSocket = new ServerSocket(10001); 
+      ServerSocket welcomeSocket = new ServerSocket(9999); 
       welcomeSocket.setReuseAddress(true);
+      TripleDES td = new TripleDES();
+      
       while(true) {
-           Socket connectionSocket = welcomeSocket.accept();
+          try {
+                Socket connectionSocket = welcomeSocket.accept();
            
-           BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())); 
-	   DataOutputStream  outToClient = new DataOutputStream(connectionSocket.getOutputStream());
-           clientSentence = inFromClient.readLine(); 
-           
-           if(clientSentence != null && clientSentence.length() > 0){
-                String TipoHash = ValidaMensagens(clientSentence);
-                if(TipoHash.length() > 0){
-                    String hash = HashString(TipoHash, clientSentence, true);
-                    outToClient.writeBytes(hash + "\n"); 
-                    outToClient.flush();
+                BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())); 
+                DataOutputStream  outToClient = new DataOutputStream(connectionSocket.getOutputStream());
+                clientSentence = inFromClient.readLine(); 
+
+                if(clientSentence != null && clientSentence.length() > 0){
+
+                     //String ModifiedSentence = AES.decrypt(key, initVector, clientSentence);
+                     String ModifiedSentence = td.decrypt(clientSentence.getBytes());
+                     
+                     ModifiedSentence = ModifiedSentence.toUpperCase();
+                     
+                    //ModifiedSentence = AES.encrypt(key, initVector, ModifiedSentence);
+                     ModifiedSentence = td.encrypt(ModifiedSentence).toString();
+
+                     outToClient.writeBytes(ModifiedSentence + "\n"); 
+                     outToClient.flush();
                 }
-           }
-           
-           inFromClient.ready();
+
+                inFromClient.ready();
+          } catch (Exception e) {
+              throw e;
+          }
         } 
     }
 } 

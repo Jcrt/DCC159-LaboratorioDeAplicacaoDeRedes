@@ -1,7 +1,9 @@
 package Classes;
 
+import Criptografia.AES;
 import Criptografia.MD5;
 import Criptografia.SHA1;
+import Criptografia.TripleDES;
 import java.io.*; 
 import java.net.*; 
 import java.security.NoSuchAlgorithmException;
@@ -25,37 +27,39 @@ class TCPClient {
 
     public static void main(String argv[]) throws Exception 
     { 
-        String sentence = ""; 
-        String hashMD5;
-        String hashSHA1;
+        
+        String key = "Bar12345Bar12345";
+        String initVector = "RandomInitVector"; 
+        String sentence = "";
         String modifiedSentence;
+        TripleDES td = new TripleDES();
         
         BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
         
         while(!sentence.toLowerCase().equals("exit")){
             System.out.print("Informe uma sentença (exit para sair): ");
             sentence = inFromUser.readLine(); 
-            hashMD5 = MD5.criptografar(sentence);
-            hashSHA1 = SHA1.SHA1(sentence);
-
+            
             List<String> mensagens = new ArrayList<>();
-            mensagens.add(sentence + "/" + hashMD5 + '\n');
-            mensagens.add(sentence + "/" + hashSHA1 + '\n');
-
+            
+            //mensagens.add(AES.encrypt(key, initVector, sentence));
+            mensagens.add(td.encrypt(sentence).toString());
+            
             for(String m : mensagens){
 
-                Socket clientSocket = new Socket("192.168.0.105", 10001); 
+                Socket clientSocket = new Socket("192.168.0.105", 9999); 
                 DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream()); 
                 BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
-                outToServer.writeBytes(m); 
+                outToServer.writeBytes(m + "\n"); 
                 modifiedSentence = inFromServer.readLine();
+                
+                //modifiedSentence = AES.decrypt(key, initVector, modifiedSentence);
+                modifiedSentence = td.decrypt(modifiedSentence.getBytes("UTF-8"));
+                
+                System.out.println("Client side com UPPER: " + modifiedSentence);
+                
                 clientSocket.close();
-
-                System.out.println("--------------------------------");
-                System.out.println("FROM SERVER: " + modifiedSentence); 
-                System.out.println("VERIFICACAO: " + VerificaHash(modifiedSentence, sentence));
-                System.out.println("--------------------------------");
             }   
         }        
     } 
